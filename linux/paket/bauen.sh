@@ -190,7 +190,7 @@ Recommends: $RECOMMENDS
 Section: utils
 Priority: optional
 Homepage: https://github.com/Rosenweg/rosenweg-profil
-Description: Rosenweg Profil
+Description: eigene Angaben im Rosenweg-Portal pflegen
  Mit dem Rosenweg-Konto anmelden und die eigenen Angaben im Rosenweg-Portal
  pflegen: Name, Telefon, Adresse, weitere Kontakte, WhatsApp-Benachrichtigung,
  Passwort, Desktop an den Stationen, SSH-Schlüssel und API-Tokens.
