@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Rosenweg Profil
+GenericName=Mein Profil
+Comment=Deine Angaben im Rosenweg-Portal: Kontakt, Adresse, Passwort und Zugänge
+Exec=rosenweg-profil
+# Name im Symbol-Thema (hicolor), kein Pfad.
+Icon=rosenweg-profil
+Terminal=false
+# Dateiname = GTK-Anwendungskennung (APPLICATION_ID in linux/CMakeLists.txt).
+StartupWMClass=ch.rosenweg4303.profil
+Categories=Settings;Network;
+Keywords=Profil;Konto;Passwort;Telefon;Adresse;Rosenweg;

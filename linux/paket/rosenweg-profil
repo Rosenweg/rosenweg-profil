@@ -1,0 +1,4 @@
+#!/bin/sh
+# Startet Rosenweg Profil aus /opt/rosenweg-profil (Flutter-Buendel sucht
+# data/ und lib/ neben der echten Programmdatei; wie rosenweg-vm).
+exec /opt/rosenweg-profil/rosenweg_profil "$@"
