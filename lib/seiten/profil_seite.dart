@@ -69,15 +69,12 @@ class _ProfilSeiteState extends State<ProfilSeite> {
             tooltip: 'Mehr',
             onSelected: (w) async {
               if (w == 'ueber') await zeigeUeber(context, widget.sitzung.app);
-              if (w == 'abmelden' && context.mounted &&
-                  await frage(context, 'Abmelden?', 'Beim nächsten Start meldest du dich wieder mit dem Rosenweg-Konto an.',
-                      ja: 'Abmelden')) {
-                await widget.sitzung.abmelden();
-              }
+              // Gemeinsame Seite aus rosenweg_basis: angemeldet als, womit, Abmelden (echter Stand)
+              if (w == 'anmeldung' && context.mounted) await zeigeAnmeldung(context, widget.sitzung);
             },
             itemBuilder: (_) => [
+              PopupMenuItem(value: 'anmeldung', child: Text('Anmeldung: ${widget.sitzung.name ?? 'angemeldet'}')),
               const PopupMenuItem(value: 'ueber', child: Text('Über Rosenweg Profil')),
-              if (!widget.sitzung.geteiltesTelefon) const PopupMenuItem(value: 'abmelden', child: Text('Abmelden')),
             ],
           ),
         ],

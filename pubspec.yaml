@@ -21,7 +21,8 @@ dependencies:
   rosenweg_basis:
     git:
       url: https://github.com/Rosenweg/rosenweg-basis.git
-      ref: 22ea4ba1d8f8908b4a8f47b987c5458b571e3bcc
+      # fester Tag (Anmeldeschirm wie auf Android, rosenweg-basis#10)
+      ref: v0.3.0
   file_selector: ^1.1.0
   image: ^4.3.0
   url_launcher: ^6.3.3
