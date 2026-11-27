@@ -13,9 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   # Gemeinsame Basis der Rosenweg-Apps (Anmeldung, API-Client, Thema, Rahmen)
-  # aus dem privaten Repo Rosenweg/rosenweg-basis. Fester Stand: main nach
-  # #5 (Anmeldeschirm aus commons-rosenweg) und #8; noch ohne Tag, darum der
-  # Commit. Sobald v0.3.0 getaggt ist, auf den Tag umstellen. Lokal gegen den
+  # aus dem oeffentlichen Repo Rosenweg/rosenweg-basis, fester Tag. Lokal gegen den
   # Nachbarordner entwickeln: pubspec_overrides.yaml (nicht eingecheckt,
   # siehe README).
   rosenweg_basis:

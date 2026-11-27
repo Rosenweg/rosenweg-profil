@@ -143,7 +143,7 @@ flutter run -d macos --dart-define=RW_ATTRAPPE=1   # ohne Server, erfundene Date
 |---|---|---|
 | Android | `flutter build apk --release` (JDK 17) | `build/app/outputs/flutter-apk/app-release.apk` |
 | macOS | `macos/installer/bauen.sh` | `build/macos-installer/Rosenweg-Profil-<version>.dmg` (ohne Developer ID ad hoc signiert) |
-| Linux | `linux/paket/im-container.sh` (Bau-Container CT 141 auf pve3) | `linux/paket/out/rosenweg-profil_<version>-<bau>_amd64.deb` |
+| Linux | `linux/paket/im-container.sh` (Bau-Container CT 141; Knoten als Argument oder in `RW_BAU_KNOTEN`) | `linux/paket/out/rosenweg-profil_<version>-<bau>_amd64.deb` |
 | Windows | `flutter build windows`, dann `iscc windows\installer\rosenweg-profil.iss` | `build/windows-installer/Rosenweg-Profil-<version>-Setup.exe` |
 | iOS | `flutter build ios --release --no-codesign` | nur Probe |
 | Logo und Symbole aller Plattformen | `sh assets/logo/erzeugen.sh [../rosenweg-basis]` | `assets/logo/`, Android-mipmaps, iOS- und macOS-AppIcon, `app_icon.ico` |
@@ -181,17 +181,19 @@ APK an.
 
 ## CI und Release
 
-Alle Läufe holen die private Basis über `.github/actions/basis-zugang`
-(Secret `BASIS_TOKEN`). Linux und Android laufen auf dem eigenen Runner
-(Gruppe `rosenweg-privat`), macOS/iOS und Windows auf von GitHub gehosteten
-Runnern.
+Alle Läufe laufen auf von GitHub gehosteten Runnern (`ubuntu-latest`, das
+`.deb` im Container `debian:13`; `macos-latest`, `windows-latest`), nie auf
+eigenen. Die Basis ist öffentlich, `pub get` holt sie ohne Token. Signiert
+wird nur bei Push auf `main` oder Tag `v*`, ein PR baut immer mit dem
+Debug-Schlüssel. `contents: write`/`id-token: write` haben nur die Jobs
+`veroeffentlichen`.
 
 | Workflow | Auslöser | Ergebnis | an /apps |
 |---|---|---|---|
 | `android.yml` | Push auf `main`, PR, Tag `v*` | `flutter analyze`, `flutter test`, APK als Artefakt | bei Tag, nur mit Rosenweg-Signatur |
 | `linux.yml` | Push auf `main`, PR, Tag `v*` | `.deb` als Artefakt | bei Tag (linux-deb) |
-| `macos.yml` | Tag `v*`, von Hand | DMG; iOS-Bau ohne Signatur (`.ipa` als Artefakt) | DMG bei Tag |
-| `windows.yml` | Tag `v*`, von Hand | Setup-`.exe` | bei Tag |
+| `macos.yml` | Tag `v*`, von Hand; öffentlich auch Push auf `main` und PR | DMG; iOS-Bau ohne Signatur (`.ipa` als Artefakt) | DMG bei Tag |
+| `windows.yml` | Tag `v*`, von Hand; öffentlich auch Push auf `main` und PR | Setup-`.exe` | bei Tag |
 
 ### Release-Ablauf
 
@@ -213,8 +215,6 @@ GitHub-Secrets (Settings → Secrets and variables → Actions), nur die Namen:
 
 | Secret | Wozu |
 |---|---|
-| `BASIS_TOKEN` | fein granulierter Token, nur Rosenweg/rosenweg-basis, *Contents: Read-only* – ohne ihn scheitert jeder Lauf mit einer klaren Meldung |
-| `BASIS_DEPLOY_KEY` | Alternative zu `BASIS_TOKEN` (Deploy-Key auf rosenweg-basis) |
 | `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | Rosenweg-Signierschlüssel (optional, siehe oben) |
 | `MACOS_ZERTIFIKAT_P12`, `MACOS_ZERTIFIKAT_PASSWORT`, `NOTAR_KEY_P8`, `NOTAR_KEY_ID`, `NOTAR_ISSUER` | macOS signieren und notarisieren (optional; sonst ad hoc) |
 
