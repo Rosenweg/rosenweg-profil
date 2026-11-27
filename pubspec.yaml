@@ -4,7 +4,7 @@ publish_to: 'none'
 
 # Version x.y.z+n: n wird zur Android-versionCode und zur Debian-Revision
 # (linux/paket/bauen.sh). Fuer ein neues Paket n anheben.
-version: 0.1.1+2
+version: 0.1.2+3
 
 environment:
   sdk: ^3.13.4
@@ -18,8 +18,8 @@ dependencies:
   rosenweg_basis:
     git:
       url: https://github.com/Rosenweg/rosenweg-basis.git
-      # Anmeldeschirm wie auf Android (rosenweg-basis#10); nach dem Merge auf den Tag v0.3.0 umstellen
-      ref: v0.3.0
+      # fester Tag; neue Fassungen von rosenweg_basis kommen als PR (Workflow in rosenweg-basis)
+      ref: v0.5.2
   file_selector: ^1.1.0
   image: ^4.3.0
   url_launcher: ^6.3.3
