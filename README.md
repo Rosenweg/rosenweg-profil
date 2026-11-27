@@ -47,7 +47,7 @@ Adresssuche) – der Knopf „Bearbeiten“ öffnet es dort.
 | Windows | ja, Setup mit Inno Setup (bei Tag `v*` an /apps) |
 | iOS | Bau ohne Signatur in der CI; nicht verteilt (braucht das Apple Developer Program) |
 
-Version **0.1.2** (`pubspec.yaml`: `0.1.2+3`, Tag `v0.1.2`), mit `rosenweg_basis` v0.5.2 (Android-Anmeldeschirm mit „QR-Code scannen“).
+Version **0.1.3** (`pubspec.yaml`: `0.1.3+4`, Tag `v0.1.3`; Logo in der Gruppenfarbe Bewohner aus dem Baukasten), mit `rosenweg_basis` v0.5.2 (Android-Anmeldeschirm mit „QR-Code scannen“).
 
 ## Bedienung
 

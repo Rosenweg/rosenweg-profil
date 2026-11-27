@@ -12,6 +12,8 @@ const profilApp = RosenwegApp(
   beschreibung: 'Deine Angaben im Rosenweg-Portal: Kontakt, Adresse, Passwort und Zugänge.',
   quelle: 'https://github.com/Rosenweg/rosenweg-profil',
   logo: AssetImage('assets/logo/rosenweg-profil-512.png'),
+  // Anmeldeschirm in der Gruppenfarbe (rosenweg_basis 0.6.1), wie das Logo
+  gruppe: RosenwegGruppe.bewohner,
 );
 
 /// --dart-define=RW_ATTRAPPE=1: ohne Anmeldung und ohne Server, mit
