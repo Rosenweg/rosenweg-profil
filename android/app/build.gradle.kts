@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -15,7 +17,6 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "ch.rosenweg4303.profil"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
@@ -30,11 +31,37 @@ android {
         versionName = flutter.versionName
     }
 
+    // Rosenweg-Signierschluessel (derselbe wie Rosenweg Telefon; die geteilten
+    // Telefone nehmen nur damit signierte APKs an):
+    //   CI:    Umgebungsvariablen SIGNING_* (Secrets, .github/workflows/android.yml)
+    //   lokal: android/keystore.properties (nicht eingecheckt, README "Signieren")
+    // Ohne beides: Debug-Signatur, damit `flutter run --release` und der CI-Bau
+    // ohne Schluessel gehen.
+    val lokal = rootProject.file("keystore.properties").takeIf { it.exists() }?.let { f ->
+        Properties().apply { f.inputStream().use { load(it) } }
+    }
+    val umgebung = providers.environmentVariable("SIGNING_STORE_FILE").orNull
+    signingConfigs {
+        if (umgebung != null) {
+            create("rosenweg") {
+                storeFile = file(umgebung)
+                storePassword = providers.environmentVariable("SIGNING_STORE_PASSWORD").get()
+                keyAlias = providers.environmentVariable("SIGNING_KEY_ALIAS").get()
+                keyPassword = providers.environmentVariable("SIGNING_KEY_PASSWORD").get()
+            }
+        } else if (lokal != null) {
+            create("rosenweg") {
+                storeFile = file(lokal.getProperty("storeFile"))
+                storePassword = lokal.getProperty("storePassword")
+                keyAlias = lokal.getProperty("keyAlias")
+                keyPassword = lokal.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("rosenweg") ?: signingConfigs.getByName("debug")
         }
     }
 }

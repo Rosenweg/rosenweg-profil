@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../bild.dart';
 import '../daten.dart';
+import '../nur_mit_konto.dart';
 import 'profil_seite.dart';
 
 /// Wer bin ich: Bild, Name, Gruppen, Zaehler, Objekte.
@@ -96,6 +97,11 @@ class _KopfState extends State<_Kopf> {
   var _laedt = false;
 
   Future<void> _bildWaehlen() async {
+    // Karte/geteiltes Telefon: PUT /api/auth/avatar ist gesperrt (nur_mit_konto.dart)
+    if (ProfilZugang.artVon(context).eingeschraenkt) {
+      zeigeMeldung(context, 'Das Profilbild änderst du nur mit dem Rosenweg-Konto – mit der Karte geht das nicht.');
+      return;
+    }
     final datei = await openFile(acceptedTypeGroups: const [
       XTypeGroup(label: 'Bilder', extensions: ['jpg', 'jpeg', 'png', 'webp'], mimeTypes: ['image/jpeg', 'image/png', 'image/webp']),
     ]);
@@ -109,7 +115,7 @@ class _KopfState extends State<_Kopf> {
       if (mounted) zeigeMeldung(context, 'Profilbild gespeichert.');
       widget.geaendert();
     } catch (e) {
-      if (mounted) zeigeMeldung(context, 'Fehler beim Hochladen: ${fehlerText(e)}', fehler: true);
+      if (mounted) zeigeMeldung(context, 'Fehler beim Hochladen: ${fehlerHinweis(e)}', fehler: true);
     } finally {
       if (mounted) setState(() => _laedt = false);
     }

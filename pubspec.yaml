@@ -12,9 +12,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  # Gemeinsame Basis aller Rosenweg-Apps. Bis das Repo freigegeben ist, kommt
-  # sie aus dem Nachbarordner: pubspec_overrides.yaml (nicht eingecheckt),
-  # siehe README "Bauen".
+  # Gemeinsame Basis der Rosenweg-Apps (Anmeldung, API-Client, Thema, Rahmen)
+  # aus dem oeffentlichen Repo Rosenweg/rosenweg-basis, fester Tag. Lokal gegen den
+  # Nachbarordner entwickeln: pubspec_overrides.yaml (nicht eingecheckt,
+  # siehe README).
   rosenweg_basis:
     git:
       url: https://github.com/Rosenweg/rosenweg-basis.git

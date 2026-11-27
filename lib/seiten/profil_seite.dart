@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:rosenweg_basis/rosenweg_basis.dart';
 
 import '../daten.dart';
+import '../nur_mit_konto.dart';
 import 'angaben.dart';
 import 'uebersicht.dart';
 import 'zugang.dart';
@@ -59,7 +60,7 @@ class _ProfilSeiteState extends State<ProfilSeite> {
   Widget build(BuildContext context) {
     final breit = MediaQuery.sizeOf(context).width >= 760;
     final inhalt = _inhalt();
-    return Scaffold(
+    return ProfilZugang(sitzung: widget.sitzung, child: Scaffold(
       appBar: AppBar(
         title: const Text('Mein Profil'),
         actions: [
@@ -102,12 +103,12 @@ class _ProfilSeiteState extends State<ProfilSeite> {
                 for (final b in _bereiche) NavigationDestination(icon: Icon(b.symbol), selectedIcon: Icon(b.aktiv), label: b.titel),
               ],
             ),
-    );
+    ));
   }
 
   Widget _inhalt() {
     final ich = _ich;
-    if (_fehler != null && ich == null) return FehlerAnzeige(text: fehlerText(_fehler!), nochmals: _laden);
+    if (_fehler != null && ich == null) return FehlerAnzeige(text: fehlerHinweis(_fehler!), nochmals: _laden);
     if (ich == null) return const LadeAnzeige();
     final kinder = switch (_bereich) {
       0 => UebersichtBereich(key: ValueKey('u$_stand'), dienst: dienst, ich: ich, geaendert: _laden),
@@ -170,7 +171,7 @@ class _LadenState<T> extends State<Laden<T>> {
         future: _f,
         builder: (context, s) {
           if (s.hasError) {
-            return Text(widget.fehlerText ?? fehlerText(s.error!),
+            return Text(widget.fehlerText ?? fehlerHinweis(s.error!),
                 style: TextStyle(color: widget.fehlerText == null ? Theme.of(context).colorScheme.error : null));
           }
           if (!s.hasData) return const Padding(padding: EdgeInsets.all(8), child: LinearProgressIndicator());
