@@ -43,7 +43,7 @@ flutter run -d linux --dart-define=RW_ATTRAPPE=1   # ohne Server, erfundene Date
 
 ## Updates
 
-Die App aktualisiert sich selbst (Updater aus `rosenweg_basis` 0.4.0, über `rosenwegStarten`): Android über den Rosenweg Updater, eigene Linux-Rechner, macOS und Windows über die Leiste „Neue Fassung … verfügbar“ (Prüfsumme aus dem Katalog wird geprüft). Aus nur auf geteilten Telefonen (Rosenweg Gerät) und auf Rosenweg-Stationen.
+Die App aktualisiert sich selbst (Updater aus `rosenweg_basis` 0.5.0, über `rosenwegStarten`): Android über den Rosenweg Updater, eigene Linux-Rechner, macOS und Windows über die Leiste „Neue Fassung … verfügbar“ (Prüfsumme aus dem Katalog wird geprüft). Aus nur auf geteilten Telefonen (Rosenweg Gerät) und auf Rosenweg-Stationen.
 
 ## Voraussetzungen ausserhalb
 
