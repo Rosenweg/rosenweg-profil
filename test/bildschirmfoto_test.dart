@@ -16,6 +16,8 @@ import 'package:rosenweg_profil/attrappe.dart';
 import 'package:rosenweg_profil/main.dart';
 import 'package:rosenweg_profil/seiten/profil_seite.dart';
 
+import 'karten_konto.dart';
+
 final ziel = Platform.environment['RW_FOTO'];
 
 Future<void> schriften() async {
@@ -53,11 +55,11 @@ void main() {
     if (ziel != null) await schriften();
   });
 
-  Future<void> zeigen(WidgetTester t, Size groesse, {int bereich = 0, Phase? phase}) async {
+  Future<void> zeigen(WidgetTester t, Size groesse, {int bereich = 0, Phase? phase, AndroidKonto? android}) async {
     t.view.physicalSize = groesse * 2;
     t.view.devicePixelRatio = 2;
     addTearDown(t.view.reset);
-    final s = RosenwegSitzung(profilApp, transport: Attrappe());
+    final s = RosenwegSitzung(profilApp, transport: Attrappe(), android: android);
     await s.starten();
     if (phase != null) s.phase = phase;
     await t.pumpWidget(RepaintBoundary(child: RosenwegRahmen(sitzung: s, inhalt: (_) => ProfilSeite(sitzung: s))));
@@ -78,5 +80,9 @@ void main() {
     await foto(t, 'rosenweg-profil-station.png');
     await zeigen(t, const Size(412, 860), phase: Phase.abgemeldet);
     await foto(t, 'rosenweg-profil-anmelden.png');
+    await zeigen(t, const Size(412, 860), bereich: 2, android: KartenKonto());
+    await foto(t, 'rosenweg-profil-karte-zugang.png');
+    await zeigen(t, const Size(412, 860), bereich: 1, android: KartenKonto());
+    await foto(t, 'rosenweg-profil-karte-angaben.png');
   }, skip: ziel == null);
 }

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:rosenweg_basis/rosenweg_basis.dart';
 
 import '../daten.dart';
+import '../nur_mit_konto.dart';
 import 'profil_seite.dart';
 
 /// Wie ich hineinkomme: Passwort, Desktop an den Stationen, SSH, API-Tokens,
@@ -16,12 +17,34 @@ class ZugangBereich extends StatelessWidget {
   final RosenwegSitzung sitzung;
 
   @override
-  Widget build(BuildContext context) => AbschnittListe(kinder: [
-        _Passwort(dienst: dienst, sitzung: sitzung),
+  Widget build(BuildContext context) {
+    // Mit der Karte oder am geteilten Telefon sperrt die API Passwort, SSH und
+    // Tokens (nur_mit_konto.dart): erklaeren statt Formulare, die scheitern.
+    // Die Desktop-Wahl an den Stationen geht weiterhin.
+    if (Zugangsart.von(sitzung).eingeschraenkt) {
+      return AbschnittListe(kinder: [
+        const _NurMitKontoAbschnitt('Passwort ändern', Icons.lock_outline, 'Das Passwort'),
         if (ich.stationsKonto) _DesktopStil(dienst: dienst),
-        if (ich.stationsKonto) _Ssh(dienst: dienst),
-        _Tokens(dienst: dienst),
+        if (ich.stationsKonto) const _NurMitKontoAbschnitt('SSH-Zugang', Icons.terminal, 'SSH-Schlüssel'),
+        const _NurMitKontoAbschnitt('API-Tokens', Icons.token_outlined, 'API-Tokens (und damit Agents)'),
       ]);
+    }
+    return AbschnittListe(kinder: [
+      _Passwort(dienst: dienst, sitzung: sitzung),
+      if (ich.stationsKonto) _DesktopStil(dienst: dienst),
+      if (ich.stationsKonto) _Ssh(dienst: dienst),
+      _Tokens(dienst: dienst),
+    ]);
+  }
+}
+
+class _NurMitKontoAbschnitt extends StatelessWidget {
+  const _NurMitKontoAbschnitt(this.titel, this.symbol, this.was);
+  final String titel;
+  final IconData symbol;
+  final String was;
+  @override
+  Widget build(BuildContext context) => Abschnitt(titel: titel, symbol: symbol, kind: NurMitKonto(was: was));
 }
 
 // ── Passwort ─────────────────────────────────────────────────────────────────
@@ -72,7 +95,7 @@ class _PasswortState extends State<_Passwort> {
         _melden(e.text, HinweisArt.fehler);
       }
     } catch (e) {
-      _melden(fehlerText(e), HinweisArt.fehler);
+      _melden(fehlerHinweis(e), HinweisArt.fehler);
     } finally {
       if (mounted) setState(() => _laeuft = false);
     }
@@ -169,7 +192,7 @@ class _DesktopStilState extends State<_DesktopStil> {
       _gut = true;
     } catch (e) {
       _stil = vorher;
-      _meldung = 'Konnte nicht gespeichert werden: ${fehlerText(e)}';
+      _meldung = 'Konnte nicht gespeichert werden: ${fehlerHinweis(e)}';
       _gut = false;
     }
     if (mounted) setState(() {});
@@ -252,7 +275,7 @@ class _SshState extends State<_Ssh> {
       _gut = true;
       await _laden();
     } catch (e) {
-      _meldung = fehlerText(e);
+      _meldung = fehlerHinweis(e);
       _gut = false;
     }
     if (mounted) setState(() {});
@@ -402,7 +425,7 @@ class _TokensState extends State<_Tokens> {
       setState(() => _neu = t);
       _neuLaden();
     } catch (e) {
-      if (mounted) zeigeMeldung(context, fehlerText(e), fehler: true);
+      if (mounted) zeigeMeldung(context, fehlerHinweis(e), fehler: true);
     }
   }
 
@@ -428,7 +451,7 @@ class _TokensState extends State<_Tokens> {
       await widget.dienst.tokenWiderrufen(t.id, grund.text);
       _neuLaden();
     } catch (e) {
-      if (mounted) zeigeMeldung(context, fehlerText(e), fehler: true);
+      if (mounted) zeigeMeldung(context, fehlerHinweis(e), fehler: true);
     }
   }
 
@@ -465,7 +488,7 @@ class _TokensState extends State<_Tokens> {
           FutureBuilder<List<ApiToken>>(
             future: _f,
             builder: (context, s) {
-              if (s.hasError) return Text('Fehler beim Laden: ${fehlerText(s.error!)}', style: TextStyle(color: f.error));
+              if (s.hasError) return Text('Fehler beim Laden: ${fehlerHinweis(s.error!)}', style: TextStyle(color: f.error));
               if (!s.hasData) return const LinearProgressIndicator();
               final l = s.data!;
               if (l.isEmpty) return const Leer('Noch keine API-Tokens erstellt.');

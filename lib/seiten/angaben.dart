@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:rosenweg_basis/rosenweg_basis.dart';
 
 import '../daten.dart';
+import '../nur_mit_konto.dart';
 import 'profil_seite.dart';
 
 /// Was ich aendere: Persoenliche Daten, Adresse, WhatsApp, weitere Kontakte.
@@ -77,7 +78,7 @@ class _PersoenlichState extends State<_Persoenlich> {
       widget.geaendert();
     } catch (e) {
       _gut = false;
-      _meldung = fehlerText(e);
+      _meldung = fehlerHinweis(e);
     } finally {
       if (mounted) setState(() => _speichert = false);
     }
@@ -85,9 +86,13 @@ class _PersoenlichState extends State<_Persoenlich> {
 
   @override
   Widget build(BuildContext context) {
+    // Karte/geteiltes Telefon: die API nimmt PUT /api/auth/profile nicht an
+    // (nur_mit_konto.dart). Angaben zeigen, aber nicht bearbeitbar.
+    final gesperrt = ProfilZugang.artVon(context).eingeschraenkt;
     Widget feld(String titel, TextEditingController c, {String? hinweis, TextInputType? art}) => TextField(
           controller: c,
           keyboardType: art,
+          enabled: !gesperrt,
           decoration: InputDecoration(labelText: titel, hintText: hinweis),
         );
     final zweiSpalten = MediaQuery.sizeOf(context).width >= 600;
@@ -99,6 +104,7 @@ class _PersoenlichState extends State<_Persoenlich> {
       titel: 'Persönliche Daten',
       symbol: Icons.badge_outlined,
       kind: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        if (gesperrt) ...[const NurMitKonto(was: 'Name, Telefon und Adresse'), const SizedBox(height: 12)],
         if (_meldung != null) ...[Hinweis(_meldung!, art: _gut ? HinweisArt.gut : HinweisArt.fehler), const SizedBox(height: 12)],
         paar(
           feld('Name', name),
@@ -119,7 +125,7 @@ class _PersoenlichState extends State<_Persoenlich> {
               const DropdownMenuItem(value: null, child: Text('– Bitte wählen –')),
               for (final e in stwegAuswahl.entries) DropdownMenuItem(value: e.key, child: Text(e.value)),
             ],
-            onChanged: (v) => setState(() => stweg = v),
+            onChanged: gesperrt ? null : (v) => setState(() => stweg = v),
           ),
         ),
         const SizedBox(height: 12),
@@ -134,17 +140,19 @@ class _PersoenlichState extends State<_Persoenlich> {
           const SizedBox(width: 12),
           Expanded(child: feld('Ort', ort, hinweis: 'Kaiseraugst')),
         ]),
-        const SizedBox(height: 16),
-        Align(
-          alignment: Alignment.centerRight,
-          child: FilledButton.icon(
-            onPressed: _speichert ? null : _speichern,
-            icon: _speichert
-                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Icon(Icons.save_outlined),
-            label: const Text('Speichern'),
+        if (!gesperrt) ...[
+          const SizedBox(height: 16),
+          Align(
+            alignment: Alignment.centerRight,
+            child: FilledButton.icon(
+              onPressed: _speichert ? null : _speichern,
+              icon: _speichert
+                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.save_outlined),
+              label: const Text('Speichern'),
+            ),
           ),
-        ),
+        ],
       ]),
     );
   }
@@ -179,7 +187,7 @@ class _WhatsAppState extends State<_WhatsApp> {
       _an = !an;
       _fehler = true;
       final hinweis = e is ApiFehler ? e.feld('hint') : null;
-      _status = '${fehlerText(e)}${hinweis != null ? ' – $hinweis' : ''}';
+      _status = '${fehlerHinweis(e)}${hinweis != null ? ' – $hinweis' : ''}';
     } finally {
       if (mounted) setState(() => _laeuft = false);
     }
@@ -233,7 +241,7 @@ class _TelefoneState extends State<_Telefone> {
       _geaendert = false;
       if (mounted) zeigeMeldung(context, 'Telefonnummern gespeichert.');
     } catch (e) {
-      if (mounted) zeigeMeldung(context, fehlerText(e), fehler: true);
+      if (mounted) zeigeMeldung(context, fehlerHinweis(e), fehler: true);
     } finally {
       if (mounted) setState(() => _speichert = false);
     }
@@ -345,7 +353,7 @@ class _EmailsState extends State<_Emails> {
       _geaendert = false;
       if (mounted) zeigeMeldung(context, 'E-Mail-Adressen gespeichert.');
     } catch (e) {
-      if (mounted) zeigeMeldung(context, fehlerText(e), fehler: true);
+      if (mounted) zeigeMeldung(context, fehlerHinweis(e), fehler: true);
     } finally {
       if (mounted) setState(() => _speichert = false);
     }

@@ -12,14 +12,16 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  # Gemeinsame Basis aller Rosenweg-Apps. Bis das Repo freigegeben ist, kommt
-  # sie aus dem Nachbarordner: pubspec_overrides.yaml (nicht eingecheckt),
-  # siehe README "Bauen".
+  # Gemeinsame Basis der Rosenweg-Apps (Anmeldung, API-Client, Thema, Rahmen)
+  # aus dem privaten Repo Rosenweg/rosenweg-basis. Fester Stand: main nach
+  # #5 (Anmeldeschirm aus commons-rosenweg) und #8; noch ohne Tag, darum der
+  # Commit. Sobald v0.3.0 getaggt ist, auf den Tag umstellen. Lokal gegen den
+  # Nachbarordner entwickeln: pubspec_overrides.yaml (nicht eingecheckt,
+  # siehe README).
   rosenweg_basis:
     git:
       url: https://github.com/Rosenweg/rosenweg-basis.git
-      # Anmeldeschirm aus commons-rosenweg (rosenweg-basis#5); nach dem Merge auf den Tag umstellen
-      ref: karten-anmeldung
+      ref: 22ea4ba1d8f8908b4a8f47b987c5458b571e3bcc
   file_selector: ^1.1.0
   image: ^4.3.0
   url_launcher: ^6.3.3

@@ -504,9 +504,11 @@ packages:
   rosenweg_basis:
     dependency: "direct main"
     description:
-      path: "../rosenweg-basis"
-      relative: true
-    source: path
+      path: "."
+      ref: "22ea4ba1d8f8908b4a8f47b987c5458b571e3bcc"
+      resolved-ref: "22ea4ba1d8f8908b4a8f47b987c5458b571e3bcc"
+      url: "https://github.com/Rosenweg/rosenweg-basis.git"
+    source: git
     version: "0.1.0"
   sky_engine:
     dependency: transitive

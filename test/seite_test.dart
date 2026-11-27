@@ -6,12 +6,15 @@ import 'package:rosenweg_profil/attrappe.dart';
 import 'package:rosenweg_profil/main.dart';
 import 'package:rosenweg_profil/seiten/profil_seite.dart';
 
-Future<(Attrappe, RosenwegSitzung)> starten(WidgetTester t, {bool stationsKonto = true, Size groesse = const Size(420, 900)}) async {
+import 'karten_konto.dart';
+
+Future<(Attrappe, RosenwegSitzung)> starten(WidgetTester t,
+    {bool stationsKonto = true, Size groesse = const Size(420, 900), AndroidKonto? android}) async {
   t.view.physicalSize = groesse * 2;
   t.view.devicePixelRatio = 2;
   addTearDown(t.view.reset);
   final a = Attrappe(stationsKonto: stationsKonto);
-  final s = RosenwegSitzung(profilApp, transport: a);
+  final s = RosenwegSitzung(profilApp, transport: a, android: android);
   await s.starten();
   await t.pumpWidget(RosenwegRahmen(sitzung: s, inhalt: (_) => ProfilSeite(sitzung: s)));
   await t.pumpAndSettle();
@@ -148,5 +151,58 @@ void main() {
     await t.tap(find.text('Nochmals'));
     await t.pumpAndSettle();
     expect(find.text('Erika Muster'), findsOneWidget);
+  });
+
+  group('mit der Karte angemeldet', () {
+    testWidgets('Zugang: Passwort, SSH und Tokens erklärt statt Formular, Desktop-Wahl bleibt', (t) async {
+      final (a, _) = await starten(t, android: KartenKonto());
+      await t.tap(find.text('Zugang'));
+      await t.pumpAndSettle();
+      expect(find.widgetWithText(TextField, 'Neues Passwort'), findsNothing);
+      expect(find.text('Dafür mit dem Rosenweg-Konto anmelden'), findsWidgets);
+      await t.scrollUntilVisible(scrollable: _liste, find.text('API-Tokens'), 200);
+      expect(find.text('Desktop an den Stationen'), findsOneWidget);
+      expect(find.text('SSH-Zugang'), findsOneWidget);
+      expect(find.text('Neuer Token'), findsNothing);
+      expect(find.textContaining('API-Tokens (und damit Agents) änderst du nur mit deinem Rosenweg-Konto'), findsOneWidget);
+      // Keine Anfrage, die die API ohnehin ablehnt
+      expect(a.anfragen.where((r) => r.pfad.startsWith('/api/me/tokens') || r.pfad.startsWith('/api/ssh/')), isEmpty);
+    });
+
+    testWidgets('Angaben: Name & Co. nur lesen, kein Speichern; weitere Nummern gehen', (t) async {
+      await starten(t, android: KartenKonto());
+      await t.tap(find.text('Angaben'));
+      await t.pumpAndSettle();
+      expect(find.text('Dafür mit dem Rosenweg-Konto anmelden'), findsOneWidget);
+      expect(t.widget<TextField>(find.widgetWithText(TextField, 'Name')).enabled, isFalse);
+      expect(find.text('Speichern'), findsNothing);
+      await t.scrollUntilVisible(scrollable: _liste, find.text('Weitere Telefonnummern'), 200);
+      expect(find.text('Weitere Telefonnummern'), findsOneWidget);
+    });
+
+    testWidgets('„Mit Rosenweg-Konto anmelden“ meldet die Karte ab und zeigt den Anmeldeschirm', (t) async {
+      final k = KartenKonto();
+      await starten(t, android: k);
+      await t.tap(find.text('Zugang'));
+      await t.pumpAndSettle();
+      await t.tap(find.text('Mit Rosenweg-Konto anmelden').first);
+      await t.pumpAndSettle();
+      expect(find.textContaining('„Mit Rosenweg-Konto anmelden“'), findsOneWidget);
+      await t.tap(find.text('Weiter'));
+      await t.pumpAndSettle();
+      expect(k.aufrufe, ['abmelden', 'anmeldeSchirm']);
+    });
+  });
+
+  testWidgets('API sperrt wegen der Karte: verständlicher Satz statt Fehlertext', (t) async {
+    final (a, _) = await starten(t);
+    a.erzwungen['PUT /api/auth/profile'] =
+        (status: 403, json: {'error': 'Mit der Karten-Anmeldung nicht erlaubt — bitte im Portal mit dem Rosenweg-Konto anmelden'});
+    await t.tap(find.text('Angaben'));
+    await t.pumpAndSettle();
+    await t.ensureVisible(find.text('Speichern'));
+    await t.tap(find.text('Speichern'));
+    await t.pumpAndSettle();
+    expect(find.text('Dafür mit dem Rosenweg-Konto anmelden – mit der Karte geht das nicht.'), findsOneWidget);
   });
 }
