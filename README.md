@@ -11,6 +11,7 @@
 - [Anmeldung](#anmeldung)
 - [Mit der Karte angemeldet](#mit-der-karte-angemeldet)
 - [Geteilte Rosenweg-Telefone](#geteilte-rosenweg-telefone)
+- [Updates](#updates)
 - [Aufbau](#aufbau)
 - [Bauen](#bauen)
 - [Signieren (Android)](#signieren-android)
@@ -46,7 +47,7 @@ Adresssuche) – der Knopf „Bearbeiten“ öffnet es dort.
 | Windows | ja, Setup mit Inno Setup (bei Tag `v*` an /apps) |
 | iOS | Bau ohne Signatur in der CI; nicht verteilt (braucht das Apple Developer Program) |
 
-Version **0.1.1** (`pubspec.yaml`: `0.1.1+2`), noch ohne Tag.
+Version **0.1.2** (`pubspec.yaml`: `0.1.2+3`, Tag `v0.1.2`), mit `rosenweg_basis` v0.5.2 (Android-Anmeldeschirm mit „QR-Code scannen“).
 
 ## Bedienung
 
@@ -115,6 +116,10 @@ und die Telefonanlage (rosenweg-basis, `docs/geteilte-telefone.md`).
 | Rosenweg-Signatur | Rosenweg Gerät reicht Anfragen nur für Apps mit seiner Signatur weiter |
 | Rosenweg Gerät ab v236 | bringt `portal_anfrage` |
 | Katalog-Eintrag `ch.rosenweg4303.profil` | auf rosenweg4303.ch/smartphones; danach bringt jeder Release-Tag die APK auch dorthin |
+
+## Updates
+
+Die App aktualisiert sich selbst (Updater aus `rosenweg_basis` ab 0.5.0, über `rosenwegStarten`): Android über den Rosenweg Updater, eigene Linux-Rechner, macOS und Windows über die Leiste „Neue Fassung … verfügbar“ (Prüfsumme aus dem Katalog wird geprüft). Aus nur auf geteilten Telefonen (Rosenweg Gerät) und auf Rosenweg-Stationen. Neue Fassungen von `rosenweg_basis` kommen als PR (Workflow „Abhängige anheben“ in rosenweg-basis).
 
 ## Aufbau
 
