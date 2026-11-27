@@ -4,15 +4,16 @@
 # linux/paket/bauen.sh — Rosenweg Profil als Debian-Paket
 # ============================================================================
 # Fuer die Stationen von Rosenweg OS (Debian 13, amd64), verteilt vom
-# PXE-Server wie rosenweg-vm. Muster: rosenweg-vm linux/paket/bauen.sh, ohne
-# deren native Bibliotheken (Go, SPICE).
+# PXE-Server wie rosenweg-vm. Muster: rosenweg-salz (gleich gebaut) und
+# rosenweg-vm linux/paket/bauen.sh, ohne deren native Bibliotheken.
 #
 #   linux/paket/bauen.sh              Werkzeuge, flutter build linux, Paket
 #   linux/paket/bauen.sh --nur-paket  nur das Paket aus build/linux/x64/release/bundle
 #   linux/paket/im-container.sh       im Bau-Container CT 141, siehe dort
 #
-# rosenweg_basis: kommt aus ../rosenweg-basis (pubspec_overrides.yaml), solange
-# das Repo nicht freigegeben ist; im-container.sh legt beides nebeneinander.
+# rosenweg_basis: im CI-Lauf ueber git (pubspec.yaml, privat mit Token); im
+# Bau-Container aus ../rosenweg-basis (pubspec_overrides.yaml), das
+# im-container.sh in der Fassung aus pubspec.yaml danebenlegt.
 #
 # Ergebnis: linux/paket/out/rosenweg-profil_<version>_amd64.deb + Pruefsumme.
 # ============================================================================
@@ -171,10 +172,13 @@ SHLIBS="$(cd "$ARBEIT" && dpkg-shlibdeps -O -l"$BAUM$ZIEL/lib" "${ELF[@]}" 2>"$A
           | sed -n 's/^shlibs:Depends=//p')"
 [ -n "$SHLIBS" ] || { cat "$ARBEIT/shlibdeps.log" >&2; die "dpkg-shlibdeps ergab keine Abhängigkeiten."; }
 
-# Zur Laufzeit: Browser fuer die Anmeldung (xdg-open). Gespeicherte Anmeldung
-# braucht einen Secret-Service-Dienst; ohne ihn gilt sie bis Programmende
-# (rosenweg_basis Schluesselbund) — darum nur empfohlen.
-DEPENDS="$SHLIBS, xdg-utils"
+# Zur Laufzeit (dlopen bzw. Programmaufruf, darum nicht in dpkg-shlibdeps):
+# - Browser fuer die Anmeldung (xdg-open).
+# - Stille Anmeldung mit dem Kerberos-Ticket der Sitzung: rosenweg_basis
+#   laedt libgssapi_krb5.so.2 per FFI (Paket libgssapi-krb5-2).
+# Gespeicherte Anmeldung braucht einen Secret-Service-Dienst; ohne ihn gilt
+# sie bis Programmende (rosenweg_basis Schluesselbund) — darum nur empfohlen.
+DEPENDS="$SHLIBS, libgssapi-krb5-2, xdg-utils"
 RECOMMENDS="gnome-keyring"
 
 GROESSE="$(du -sk --apparent-size "$BAUM" | cut -f1)"
@@ -191,8 +195,9 @@ Section: utils
 Priority: optional
 Homepage: https://github.com/Rosenweg/rosenweg-profil
 Description: eigene Angaben im Rosenweg-Portal pflegen
- Mit dem Rosenweg-Konto anmelden und die eigenen Angaben im Rosenweg-Portal
- pflegen: Name, Telefon, Adresse, weitere Kontakte, WhatsApp-Benachrichtigung,
+ Mit dem Rosenweg-Konto anmelden (an den Stationen still mit der
+ Domänenanmeldung) und die eigenen Angaben im Rosenweg-Portal pflegen:
+ Name, Telefon, Adresse, weitere Kontakte, WhatsApp-Benachrichtigung,
  Passwort, Desktop an den Stationen, SSH-Schlüssel und API-Tokens.
  .
  Gebaut aus rosenweg-profil $RW_STAND.

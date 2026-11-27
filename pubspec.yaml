@@ -12,13 +12,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  # Gemeinsame Basis aller Rosenweg-Apps. Bis das Repo freigegeben ist, kommt
-  # sie aus dem Nachbarordner: pubspec_overrides.yaml (nicht eingecheckt),
-  # siehe README "Bauen".
+  # Gemeinsame Basis der Rosenweg-Apps (Anmeldung, API-Client, Thema, Rahmen)
+  # aus dem oeffentlichen Repo Rosenweg/rosenweg-basis, fester Tag. Lokal gegen den
+  # Nachbarordner entwickeln: pubspec_overrides.yaml (nicht eingecheckt,
+  # siehe README).
   rosenweg_basis:
     git:
       url: https://github.com/Rosenweg/rosenweg-basis.git
-      # Anmeldeschirm wie auf Android (rosenweg-basis#10); nach dem Merge auf den Tag v0.3.0 umstellen
+      # fester Tag (Anmeldeschirm wie auf Android, rosenweg-basis#10)
       ref: v0.3.0
   file_selector: ^1.1.0
   image: ^4.3.0

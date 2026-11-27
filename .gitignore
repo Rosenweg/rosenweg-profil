@@ -52,3 +52,8 @@ pubspec_overrides.yaml
 # Paketbau
 /linux/paket/arbeit/
 /linux/paket/out/
+
+# Signieren mit dem Rosenweg-Schluessel (lokal, README "Signieren")
+/android/keystore.properties
+*.jks
+*.keystore
