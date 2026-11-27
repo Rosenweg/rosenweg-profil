@@ -41,6 +41,6 @@ runs:
             echo "GIT_CONFIG_VALUE_0=Authorization: Basic $kopf"
           } >> "$GITHUB_ENV"
         else
-          echo "::error::Secret BASIS_TOKEN (oder BASIS_DEPLOY_KEY) fehlt — ohne kann pub die private Basis Rosenweg/rosenweg-basis nicht holen. Siehe README, Abschnitt Bau auf GitHub."
+          echo "::error::Secret BASIS_TOKEN (oder BASIS_DEPLOY_KEY) fehlt — ohne kann pub die private Basis Rosenweg/rosenweg-basis nicht holen. Siehe README, Abschnitt Konfiguration."
           exit 1
         fi
