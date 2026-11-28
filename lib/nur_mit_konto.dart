@@ -7,12 +7,15 @@ import 'package:url_launcher/url_launcher.dart';
 ///
 /// Die Haupt-API sperrt fuer die Karten-Sitzung (`rw_app_…`) und am geteilten
 /// Telefon (Anlage-Token) alles, womit man sich anmeldet — wie fuer API-Tokens
-/// (`PAT_GESPERRT` und `requireUserLogin` in api/middleware/auth.js):
-/// Passwort, API-Tokens, Passkeys, SSH-Schluessel und alles unter `/api/auth/`
-/// ausser dem Lesen von `auth/me` — also auch Profilangaben und Profilbild
-/// (`PUT /api/auth/profile`, `PUT /api/auth/avatar`). Die Karte ist ein
-/// schwaecherer Ausweis als das Passwort. Statt eines Fehlers erklaert die App
-/// das vorher und bietet den Weg zum Rosenweg-Konto an.
+/// (`lib/sperrliste.js` und `requireUserLogin` in der Haupt-API): Passwort,
+/// API-Tokens, Passkeys, SSH-Schluessel. Die Karte ist ein schwaecherer
+/// Ausweis als das Passwort (Konto-Uebernahme). Statt eines Fehlers erklaert
+/// die App das vorher und bietet den Weg zum Rosenweg-Konto an.
+///
+/// Seit 28.11.2026 (Entscheid Stefan, „Karte wie Schluessel“) gehen mit der
+/// Karte und am geteilten Telefon die Profil-Angaben und das Profilbild
+/// (`PUT /api/auth/profile`, `PUT /api/auth/avatar`); die API protokolliert
+/// jede Aenderung ([MitKarteProtokolliert]).
 enum Zugangsart {
   /// Rosenweg-Konto (Browser oder still per Kerberos): alles erlaubt.
   konto,
@@ -45,6 +48,18 @@ bool istNurMitKonto(Object e) =>
 /// verstaendlichen Satz.
 String fehlerHinweis(Object e) =>
     istNurMitKonto(e) ? 'Dafür mit dem Rosenweg-Konto anmelden – mit der Karte geht das nicht.' : fehlerText(e);
+
+/// Satz ueber einem Formular, das mit der Karte geht: die Aenderung wird
+/// protokolliert (admin_protokoll der Haupt-API, Bereich „profil“).
+class MitKarteProtokolliert extends StatelessWidget {
+  const MitKarteProtokolliert({super.key});
+
+  @override
+  Widget build(BuildContext context) => Hinweis(
+        '${ProfilZugang.artVon(context) == Zugangsart.geteiltesTelefon ? 'Du bist am geteilten Telefon angemeldet.' : 'Du bist mit der Rosenweg-Karte angemeldet.'} '
+        'Änderungen gehen, werden aber mit Gerät und Zeit protokolliert.',
+      );
+}
 
 /// Gibt die Sitzung an die Bereiche weiter, ohne sie durch jede Ebene zu reichen.
 class ProfilZugang extends InheritedWidget {

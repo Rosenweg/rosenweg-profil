@@ -169,13 +169,20 @@ void main() {
       expect(a.anfragen.where((r) => r.pfad.startsWith('/api/me/tokens') || r.pfad.startsWith('/api/ssh/')), isEmpty);
     });
 
-    testWidgets('Angaben: Name & Co. nur lesen, kein Speichern; weitere Nummern gehen', (t) async {
-      await starten(t, android: KartenKonto());
+    testWidgets('Angaben: Name & Co. bearbeitbar, mit Hinweis aufs Protokoll; Speichern schickt sie', (t) async {
+      final (a, _) = await starten(t, android: KartenKonto());
       await t.tap(find.text('Angaben'));
       await t.pumpAndSettle();
-      expect(find.text('Dafür mit dem Rosenweg-Konto anmelden'), findsOneWidget);
-      expect(t.widget<TextField>(find.widgetWithText(TextField, 'Name')).enabled, isFalse);
-      expect(find.text('Speichern'), findsNothing);
+      expect(find.textContaining('mit der Rosenweg-Karte angemeldet. Änderungen gehen, werden aber'), findsOneWidget);
+      expect(find.text('Dafür mit dem Rosenweg-Konto anmelden'), findsNothing);
+      expect(t.widget<TextField>(find.widgetWithText(TextField, 'Name')).enabled, isNot(false));
+      await t.enterText(find.widgetWithText(TextField, 'Name'), 'Erika Beispiel');
+      await t.ensureVisible(find.text('Speichern'));
+      await t.tap(find.text('Speichern'));
+      await t.pumpAndSettle();
+      final r = a.anfragen.lastWhere((r) => r.pfad == '/api/auth/profile');
+      expect((r.koerper as Map)['name'], 'Erika Beispiel');
+      expect(find.text('Profil erfolgreich gespeichert.'), findsOneWidget);
       await t.scrollUntilVisible(scrollable: _liste, find.text('Weitere Telefonnummern'), 200);
       expect(find.text('Weitere Telefonnummern'), findsOneWidget);
     });
@@ -191,6 +198,40 @@ void main() {
       await t.tap(find.text('Weiter'));
       await t.pumpAndSettle();
       expect(k.aufrufe, ['abmelden', 'anmeldeSchirm']);
+    });
+  });
+
+  group('am geteilten Telefon', () {
+    Future<(Attrappe, RosenwegSitzung)> geteilt(WidgetTester t, String bereich) async {
+      t.view.physicalSize = const Size(420, 900) * 2;
+      t.view.devicePixelRatio = 2;
+      addTearDown(t.view.reset);
+      final a = Attrappe();
+      final s = RosenwegSitzung(profilApp, transport: a);
+      await s.starten();
+      s.geteiltesTelefon = true;
+      await t.pumpWidget(RosenwegRahmen(sitzung: s, inhalt: (_) => ProfilSeite(sitzung: s)));
+      await t.pumpAndSettle();
+      await t.tap(find.text(bereich));
+      await t.pumpAndSettle();
+      return (a, s);
+    }
+
+    testWidgets('Angaben bearbeitbar, mit Hinweis aufs Protokoll', (t) async {
+      final (a, _) = await geteilt(t, 'Angaben');
+      expect(find.textContaining('am geteilten Telefon angemeldet. Änderungen gehen'), findsOneWidget);
+      await t.enterText(find.widgetWithText(TextField, 'Ort'), 'Kaiseraugst AG');
+      await t.ensureVisible(find.text('Speichern'));
+      await t.tap(find.text('Speichern'));
+      await t.pumpAndSettle();
+      expect((a.anfragen.lastWhere((r) => r.pfad == '/api/auth/profile').koerper as Map)['ort'], 'Kaiseraugst AG');
+    });
+
+    testWidgets('Zugang: Passwort, SSH und Tokens bleiben beim Rosenweg-Konto', (t) async {
+      final (a, _) = await geteilt(t, 'Zugang');
+      expect(find.widgetWithText(TextField, 'Neues Passwort'), findsNothing);
+      expect(find.textContaining('nicht am geteilten Telefon'), findsWidgets);
+      expect(a.anfragen.where((r) => r.pfad.startsWith('/api/me/tokens') || r.pfad.startsWith('/api/ssh/')), isEmpty);
     });
   });
 
