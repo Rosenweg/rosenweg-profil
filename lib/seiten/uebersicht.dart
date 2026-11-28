@@ -97,11 +97,8 @@ class _KopfState extends State<_Kopf> {
   var _laedt = false;
 
   Future<void> _bildWaehlen() async {
-    // Karte/geteiltes Telefon: PUT /api/auth/avatar ist gesperrt (nur_mit_konto.dart)
-    if (ProfilZugang.artVon(context).eingeschraenkt) {
-      zeigeMeldung(context, 'Das Profilbild änderst du nur mit dem Rosenweg-Konto – mit der Karte geht das nicht.');
-      return;
-    }
+    // Karte/geteiltes Telefon: seit 28.11.2026 erlaubt; die API protokolliert die Aenderung
+    final mitKarte = ProfilZugang.artVon(context).eingeschraenkt;
     final datei = await openFile(acceptedTypeGroups: const [
       XTypeGroup(label: 'Bilder', extensions: ['jpg', 'jpeg', 'png', 'webp'], mimeTypes: ['image/jpeg', 'image/png', 'image/webp']),
     ]);
@@ -112,7 +109,7 @@ class _KopfState extends State<_Kopf> {
       final jpeg = profilBild(roh);
       if (jpeg == null) throw ApiFehler(0, 'Das Bild lässt sich nicht lesen.');
       await widget.dienst.avatarSetzen(jpeg);
-      if (mounted) zeigeMeldung(context, 'Profilbild gespeichert.');
+      if (mounted) zeigeMeldung(context, mitKarte ? 'Profilbild gespeichert (mit der Karte, protokolliert).' : 'Profilbild gespeichert.');
       widget.geaendert();
     } catch (e) {
       if (mounted) zeigeMeldung(context, 'Fehler beim Hochladen: ${fehlerHinweis(e)}', fehler: true);

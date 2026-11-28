@@ -86,13 +86,12 @@ class _PersoenlichState extends State<_Persoenlich> {
 
   @override
   Widget build(BuildContext context) {
-    // Karte/geteiltes Telefon: die API nimmt PUT /api/auth/profile nicht an
-    // (nur_mit_konto.dart). Angaben zeigen, aber nicht bearbeitbar.
-    final gesperrt = ProfilZugang.artVon(context).eingeschraenkt;
+    // Karte/geteiltes Telefon: seit 28.11.2026 bearbeitbar (Karte wie Schluessel);
+    // die API protokolliert die Aenderung, das steht als Satz ueber dem Formular.
+    final mitKarte = ProfilZugang.artVon(context).eingeschraenkt;
     Widget feld(String titel, TextEditingController c, {String? hinweis, TextInputType? art}) => TextField(
           controller: c,
           keyboardType: art,
-          enabled: !gesperrt,
           decoration: InputDecoration(labelText: titel, hintText: hinweis),
         );
     final zweiSpalten = MediaQuery.sizeOf(context).width >= 600;
@@ -104,7 +103,7 @@ class _PersoenlichState extends State<_Persoenlich> {
       titel: 'Persönliche Daten',
       symbol: Icons.badge_outlined,
       kind: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        if (gesperrt) ...[const NurMitKonto(was: 'Name, Telefon und Adresse'), const SizedBox(height: 12)],
+        if (mitKarte) ...[const MitKarteProtokolliert(), const SizedBox(height: 12)],
         if (_meldung != null) ...[Hinweis(_meldung!, art: _gut ? HinweisArt.gut : HinweisArt.fehler), const SizedBox(height: 12)],
         paar(
           feld('Name', name),
@@ -125,7 +124,7 @@ class _PersoenlichState extends State<_Persoenlich> {
               const DropdownMenuItem(value: null, child: Text('– Bitte wählen –')),
               for (final e in stwegAuswahl.entries) DropdownMenuItem(value: e.key, child: Text(e.value)),
             ],
-            onChanged: gesperrt ? null : (v) => setState(() => stweg = v),
+            onChanged: (v) => setState(() => stweg = v),
           ),
         ),
         const SizedBox(height: 12),
@@ -140,19 +139,17 @@ class _PersoenlichState extends State<_Persoenlich> {
           const SizedBox(width: 12),
           Expanded(child: feld('Ort', ort, hinweis: 'Kaiseraugst')),
         ]),
-        if (!gesperrt) ...[
-          const SizedBox(height: 16),
-          Align(
-            alignment: Alignment.centerRight,
-            child: FilledButton.icon(
-              onPressed: _speichert ? null : _speichern,
-              icon: _speichert
-                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.save_outlined),
-              label: const Text('Speichern'),
-            ),
+        const SizedBox(height: 16),
+        Align(
+          alignment: Alignment.centerRight,
+          child: FilledButton.icon(
+            onPressed: _speichert ? null : _speichern,
+            icon: _speichert
+                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.save_outlined),
+            label: const Text('Speichern'),
           ),
-        ],
+        ),
       ]),
     );
   }
